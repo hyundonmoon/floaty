@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/tauri-v2/crates/tauri-cli/schema.json",
+  "productName": "Floaty",
+  "version": "0.1.0",
+  "identifier": "com.floaty.notes",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "withGlobalTauri": true,
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
+    },
+    "windows": [
+      {
+        "label": "panel",
+        "title": "Floaty",
+        "url": "panel.html",
+        "width": 300,
+        "height": 450,
+        "resizable": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "transparent": true,
+        "decorations": true
+      }
+    ],
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true,
+      "tooltip": "Floaty"
+    }
+  }
+}

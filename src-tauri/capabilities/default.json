@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/tauri-v2/crates/tauri-utils/schema/capability.json",
+  "identifier": "default",
+  "description": "Default capabilities for Floaty",
+  "windows": ["panel", "note-*"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-set-focus",
+    "core:window:allow-outer-position",
+    "core:window:allow-start-dragging",
+    "core:window:allow-scale-factor",
+    "positioner:default"
+  ]
+}

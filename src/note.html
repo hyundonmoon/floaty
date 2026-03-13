@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="note">
+  <div class="note-container">
+    <div class="note-titlebar" data-tauri-drag-region>
+      <span class="note-titlebar-text" data-tauri-drag-region>Note</span>
+      <div class="note-titlebar-actions">
+        <button id="close-btn" title="Close">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--icon-muted)" stroke-width="2" stroke-linecap="round">
+            <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="note-body">
+      <textarea id="note-textarea" placeholder="Type your note..."></textarea>
+    </div>
+  </div>
+  <script src="note.js"></script>
+</body>
+</html>

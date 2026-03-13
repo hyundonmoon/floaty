@@ -1,0 +1,13 @@
+# Rust
+src-tauri/target/
+
+# macOS
+.DS_Store
+
+# Playwright
+.playwright-mcp/
+mockup.png
+panel-actual.png
+
+# Claude
+.claude/
