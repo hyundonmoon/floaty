@@ -1,5 +1,6 @@
-# Rust
+# Rust / Tauri
 src-tauri/target/
+src-tauri/gen/
 
 # macOS
 .DS_Store
