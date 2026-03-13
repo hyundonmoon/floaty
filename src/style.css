@@ -251,6 +251,11 @@ body.note {
   white-space: nowrap;
   flex: 1;
   margin-right: 8px;
+  cursor: grab;
+}
+
+.note-titlebar-text:active {
+  cursor: grabbing;
 }
 
 .note-titlebar-actions {
