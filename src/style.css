@@ -4,7 +4,7 @@
   --bg-edit: #f4faf7;
   --border: #c8e6da;
   --border-row: #e8f2ec;
-  --text: #1a3a2e;
+  --text: #1e9e73;
   --text-dim: #7ab8a0;
   --accent: #2ebd8e;
   --accent-dim: #a8dcc8;
@@ -25,7 +25,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text);
   overflow: hidden;
 }
@@ -33,10 +33,18 @@ body {
 /* ── Panel ── */
 
 body.panel {
+  background-color: transparent;
+}
+
+.panel-container {
   background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px var(--note-shadow);
+  overflow: hidden;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
 .panel-header {
@@ -122,13 +130,13 @@ body.panel {
 }
 
 .note-title {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
   word-break: break-word;
 }
 
 .note-preview {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
   margin-top: 3px;
   white-space: nowrap;
@@ -187,8 +195,8 @@ body.panel {
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 13px;
+  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
   line-height: 1.5;
   padding: 8px 10px;
   resize: none;
@@ -203,7 +211,7 @@ body.panel {
   justify-content: center;
   min-height: 120px;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ── Floating Note ── */
@@ -221,7 +229,7 @@ body.note {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
 }
 
@@ -236,7 +244,7 @@ body.note {
 }
 
 .note-titlebar-text {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -277,8 +285,8 @@ body.note {
   background: transparent;
   border: none;
   outline: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 12px;
+  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
   color: var(--text);
   line-height: 1.6;
   resize: none;

@@ -23,7 +23,8 @@
         "visible": false,
         "alwaysOnTop": true,
         "transparent": true,
-        "decorations": true
+        "shadow": false,
+        "decorations": false
       }
     ],
     "trayIcon": {
