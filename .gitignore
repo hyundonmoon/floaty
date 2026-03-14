@@ -7,8 +7,15 @@ src-tauri/gen/
 
 # Playwright
 .playwright-mcp/
-mockup.png
-panel-actual.png
 
 # Claude
 .claude/
+
+# Dev artifacts
+mockup.png
+panel-actual.png
+docs/
+
+# Mobile icons (not targeting mobile)
+src-tauri/icons/android/
+src-tauri/icons/ios/

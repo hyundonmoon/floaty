@@ -7,7 +7,7 @@ use notes::NoteStore;
 use std::sync::Mutex;
 use tauri::{
     tray::{MouseButtonState, TrayIconEvent},
-    Manager, WindowEvent,
+    Manager, RunEvent, WindowEvent,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -79,6 +79,15 @@ pub fn run() {
                 }
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let RunEvent::Reopen { .. } = event {
+                if let Some(panel) = app.get_webview_window("panel") {
+                    let _ = WindowExt::move_window(&panel, Position::TrayCenter);
+                    let _ = panel.show();
+                    let _ = panel.set_focus();
+                }
+            }
+        });
 }
