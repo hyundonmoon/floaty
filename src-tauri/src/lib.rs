@@ -7,9 +7,15 @@ use notes::NoteStore;
 use std::sync::Mutex;
 use tauri::{
     tray::{MouseButtonState, TrayIconEvent},
-    Manager, RunEvent, WindowEvent,
+    Manager, RunEvent, WebviewWindow, WindowEvent,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
+
+fn show_panel(panel: &WebviewWindow, position: Position) {
+    let _ = WindowExt::move_window(panel, position);
+    let _ = panel.show();
+    let _ = panel.set_focus();
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,7 +33,6 @@ pub fn run() {
             windows::set_window_opacity,
         ])
         .setup(|app| {
-            // Initialize note store
             let data_dir = dirs::data_dir()
                 .expect("Could not find data directory")
                 .join("Floaty");
@@ -47,6 +52,11 @@ pub fn run() {
                 windows::create_floating_note_window(&app_handle, &note.id, x, y);
             }
 
+            // Show panel on launch (center on screen; tray position unknown yet)
+            if let Some(panel) = app.get_webview_window("panel") {
+                show_panel(&panel, Position::Center);
+            }
+
             // Tray icon click handler
             let tray = app.tray_by_id("main").expect("No tray icon found");
             let app_handle = app.handle().clone();
@@ -55,14 +65,11 @@ pub fn run() {
                 tauri_plugin_positioner::on_tray_event(&app_handle, &event);
 
                 if let TrayIconEvent::Click { button_state: MouseButtonState::Up, .. } = event {
-                    let app = &app_handle;
-                    if let Some(panel) = app.get_webview_window("panel") {
+                    if let Some(panel) = app_handle.get_webview_window("panel") {
                         if panel.is_visible().unwrap_or(false) {
                             let _ = panel.hide();
                         } else {
-                            let _ = WindowExt::move_window(&panel, Position::TrayCenter);
-                            let _ = panel.show();
-                            let _ = panel.set_focus();
+                            show_panel(&panel, Position::TrayCenter);
                         }
                     }
                 }
@@ -84,9 +91,7 @@ pub fn run() {
         .run(|app, event| {
             if let RunEvent::Reopen { .. } = event {
                 if let Some(panel) = app.get_webview_window("panel") {
-                    let _ = WindowExt::move_window(&panel, Position::TrayCenter);
-                    let _ = panel.show();
-                    let _ = panel.set_focus();
+                    show_panel(&panel, Position::TrayCenter);
                 }
             }
         });

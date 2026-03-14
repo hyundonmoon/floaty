@@ -19,3 +19,8 @@ docs/
 # Mobile icons (not targeting mobile)
 src-tauri/icons/android/
 src-tauri/icons/ios/
+
+# Windows/generated icons
+src-tauri/icons/icon.svg
+src-tauri/icons/Square*.png
+src-tauri/icons/StoreLogo.png

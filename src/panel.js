@@ -155,7 +155,8 @@ listen('notes-changed', event => {
 document.getElementById('add-btn').addEventListener('click', async () => {
   const note = await invoke('create_note');
   editingId = note.id;
-  // notes-changed event will trigger renderNotes
+  notes = await invoke('get_all_notes');
+  renderNotes();
 });
 
 // Init
