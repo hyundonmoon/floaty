@@ -88,16 +88,17 @@ pub fn update_size(state: State<'_, NoteStoreState>, id: String, width: f64, hei
 pub fn open_note_window(app: AppHandle, state: State<'_, NoteStoreState>, id: String) {
     let store = state.lock().unwrap();
     if let Some(note) = store.get_all().into_iter().find(|n| n.id == id) {
-        let (x, y) = note
-            .position
-            .map(|p| (Some(p.x), Some(p.y)))
-            .unwrap_or((None, None));
-        let (w, h) = note
-            .size
-            .map(|s| (Some(s.width), Some(s.height)))
-            .unwrap_or((None, None));
+        let pos = note.position.as_ref();
+        let size = note.size.as_ref();
         drop(store);
-        windows::create_floating_note_window(&app, &id, x, y, w, h);
+        windows::create_floating_note_window(
+            &app,
+            &id,
+            pos.map(|p| p.x),
+            pos.map(|p| p.y),
+            size.map(|s| s.width),
+            size.map(|s| s.height),
+        );
     }
 }
 

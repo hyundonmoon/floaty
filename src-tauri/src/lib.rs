@@ -64,15 +64,16 @@ pub fn run() {
 
             let app_handle = app.handle().clone();
             for note in pinned {
-                let (x, y) = note
-                    .position
-                    .map(|p| (Some(p.x), Some(p.y)))
-                    .unwrap_or((None, None));
-                let (w, h) = note
-                    .size
-                    .map(|s| (Some(s.width), Some(s.height)))
-                    .unwrap_or((None, None));
-                windows::create_floating_note_window(&app_handle, &note.id, x, y, w, h);
+                let pos = note.position.as_ref();
+                let size = note.size.as_ref();
+                windows::create_floating_note_window(
+                    &app_handle,
+                    &note.id,
+                    pos.map(|p| p.x),
+                    pos.map(|p| p.y),
+                    size.map(|s| s.width),
+                    size.map(|s| s.height),
+                );
             }
 
             // Show panel on launch (center on screen; tray position unknown yet)

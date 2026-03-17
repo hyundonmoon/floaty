@@ -1,17 +1,12 @@
+use crate::notes::Size;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct PanelSize {
-    pub width: f64,
-    pub height: f64,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Preferences {
     #[serde(default)]
-    pub panel_size: Option<PanelSize>,
+    pub panel_size: Option<Size>,
 }
 
 impl Default for Preferences {
@@ -48,12 +43,12 @@ impl PreferencesStore {
         }
     }
 
-    pub fn get_panel_size(&self) -> Option<PanelSize> {
+    pub fn get_panel_size(&self) -> Option<Size> {
         self.prefs.panel_size.clone()
     }
 
     pub fn set_panel_size(&mut self, width: f64, height: f64) {
-        self.prefs.panel_size = Some(PanelSize { width, height });
+        self.prefs.panel_size = Some(Size { width, height });
         self.save_to_disk();
     }
 }

@@ -1,5 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
+const { getCurrentWindow } = window.__TAURI__.window;
 
 let notes = [];
 let editingId = null;
@@ -159,8 +160,6 @@ document.getElementById('add-btn').addEventListener('click', async () => {
   renderNotes();
 });
 
-// Panel size tracking
-const { getCurrentWindow } = window.__TAURI__.window;
 const panelWindow = getCurrentWindow();
 let lastPanelSize = { width: 0, height: 0 };
 
