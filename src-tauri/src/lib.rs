@@ -3,8 +3,9 @@ mod notes;
 mod preferences;
 mod windows;
 
-use commands::NoteStoreState;
+use commands::{NoteStoreState, PreferencesState};
 use notes::NoteStore;
+use preferences::PreferencesStore;
 use std::sync::Mutex;
 use tauri::{
     tray::{MouseButtonState, TrayIconEvent},
@@ -31,6 +32,7 @@ pub fn run() {
             commands::unpin_note,
             commands::update_position,
             commands::update_size,
+            commands::update_panel_size,
             commands::open_note_window,
             windows::set_window_opacity,
         ])
@@ -44,6 +46,21 @@ pub fn run() {
             // Restore pinned notes
             let pinned = store.get_pinned();
             app.manage::<NoteStoreState>(Mutex::new(store));
+
+            let prefs_path = data_dir.join("preferences.json");
+            let prefs_store = PreferencesStore::new(prefs_path);
+
+            // Restore panel size
+            if let Some(panel_size) = prefs_store.get_panel_size() {
+                if let Some(panel) = app.get_webview_window("panel") {
+                    let _ = panel.set_size(tauri::Size::Logical(tauri::LogicalSize {
+                        width: panel_size.width,
+                        height: panel_size.height,
+                    }));
+                }
+            }
+
+            app.manage::<PreferencesState>(Mutex::new(prefs_store));
 
             let app_handle = app.handle().clone();
             for note in pinned {

@@ -1,9 +1,11 @@
 use crate::notes::{Note, NoteStore};
+use crate::preferences::PreferencesStore;
 use crate::windows;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 
 pub type NoteStoreState = Mutex<NoteStore>;
+pub type PreferencesState = Mutex<PreferencesStore>;
 
 fn emit_notes_changed(app: &AppHandle, store: &NoteStore) {
     let notes = store.get_all();
@@ -97,4 +99,10 @@ pub fn open_note_window(app: AppHandle, state: State<'_, NoteStoreState>, id: St
         drop(store);
         windows::create_floating_note_window(&app, &id, x, y, w, h);
     }
+}
+
+#[tauri::command]
+pub fn update_panel_size(state: State<'_, PreferencesState>, width: f64, height: f64) {
+    let mut prefs = state.lock().unwrap();
+    prefs.set_panel_size(width, height);
 }
