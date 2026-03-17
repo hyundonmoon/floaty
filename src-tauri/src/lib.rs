@@ -1,5 +1,6 @@
 mod commands;
 mod notes;
+mod preferences;
 mod windows;
 
 use commands::NoteStoreState;
