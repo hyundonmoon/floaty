@@ -10,19 +10,29 @@ pub fn set_window_opacity(window: tauri::WebviewWindow, opacity: f64) {
     }
 }
 
-pub fn create_floating_note_window(app: &AppHandle, note_id: &str, x: Option<f64>, y: Option<f64>) {
+pub fn create_floating_note_window(
+    app: &AppHandle,
+    note_id: &str,
+    x: Option<f64>,
+    y: Option<f64>,
+    width: Option<f64>,
+    height: Option<f64>,
+) {
     let label = format!("note-{}", note_id);
 
-    // Skip if window already exists
     if app.get_webview_window(&label).is_some() {
         return;
     }
 
+    let w = width.unwrap_or(220.0);
+    let h = height.unwrap_or(180.0);
+
     let url = format!("note.html?id={}", note_id);
     let mut builder = WebviewWindowBuilder::new(app, &label, WebviewUrl::App(url.into()))
         .title("Floaty Note")
-        .inner_size(220.0, 180.0)
-        .resizable(false)
+        .inner_size(w, h)
+        .min_inner_size(220.0, 180.0)
+        .resizable(true)
         .decorations(false)
         .transparent(true)
         .shadow(false)

@@ -77,6 +77,12 @@ pub fn update_position(state: State<'_, NoteStoreState>, id: String, x: f64, y: 
 }
 
 #[tauri::command]
+pub fn update_size(state: State<'_, NoteStoreState>, id: String, width: f64, height: f64) {
+    let mut store = state.lock().unwrap();
+    store.update_size(&id, width, height);
+}
+
+#[tauri::command]
 pub fn open_note_window(app: AppHandle, state: State<'_, NoteStoreState>, id: String) {
     let store = state.lock().unwrap();
     if let Some(note) = store.get_all().into_iter().find(|n| n.id == id) {
@@ -84,7 +90,11 @@ pub fn open_note_window(app: AppHandle, state: State<'_, NoteStoreState>, id: St
             .position
             .map(|p| (Some(p.x), Some(p.y)))
             .unwrap_or((None, None));
+        let (w, h) = note
+            .size
+            .map(|s| (Some(s.width), Some(s.height)))
+            .unwrap_or((None, None));
         drop(store);
-        windows::create_floating_note_window(&app, &id, x, y);
+        windows::create_floating_note_window(&app, &id, x, y, w, h);
     }
 }

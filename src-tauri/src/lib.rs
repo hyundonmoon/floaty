@@ -29,6 +29,7 @@ pub fn run() {
             commands::pin_note,
             commands::unpin_note,
             commands::update_position,
+            commands::update_size,
             commands::open_note_window,
             windows::set_window_opacity,
         ])
@@ -49,7 +50,11 @@ pub fn run() {
                     .position
                     .map(|p| (Some(p.x), Some(p.y)))
                     .unwrap_or((None, None));
-                windows::create_floating_note_window(&app_handle, &note.id, x, y);
+                let (w, h) = note
+                    .size
+                    .map(|s| (Some(s.width), Some(s.height)))
+                    .unwrap_or((None, None));
+                windows::create_floating_note_window(&app_handle, &note.id, x, y, w, h);
             }
 
             // Show panel on launch (center on screen; tray position unknown yet)
