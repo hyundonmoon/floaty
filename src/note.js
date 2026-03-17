@@ -11,6 +11,7 @@ const closeBtn = document.getElementById('close-btn');
 
 let lastSavedText = '';
 let lastPosition = { x: 0, y: 0 };
+let lastSize = { width: 0, height: 0 };
 
 function updateDisplay(note) {
   if (!note) return;
@@ -69,6 +70,15 @@ setInterval(async () => {
     if (logicalX !== lastPosition.x || logicalY !== lastPosition.y) {
       lastPosition = { x: logicalX, y: logicalY };
       invoke('update_position', { id: noteId, x: logicalX, y: logicalY });
+    }
+
+    const size = await currentWindow.innerSize();
+    const logicalW = size.width / scale;
+    const logicalH = size.height / scale;
+
+    if (logicalW !== lastSize.width || logicalH !== lastSize.height) {
+      lastSize = { width: logicalW, height: logicalH };
+      invoke('update_size', { id: noteId, width: logicalW, height: logicalH });
     }
   } catch (_) {
     // Window may be closing
