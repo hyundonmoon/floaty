@@ -159,6 +159,27 @@ document.getElementById('add-btn').addEventListener('click', async () => {
   renderNotes();
 });
 
+// Panel size tracking
+const { getCurrentWindow } = window.__TAURI__.window;
+const panelWindow = getCurrentWindow();
+let lastPanelSize = { width: 0, height: 0 };
+
+setInterval(async () => {
+  try {
+    const size = await panelWindow.innerSize();
+    const scale = await panelWindow.scaleFactor();
+    const logicalW = size.width / scale;
+    const logicalH = size.height / scale;
+
+    if (logicalW !== lastPanelSize.width || logicalH !== lastPanelSize.height) {
+      lastPanelSize = { width: logicalW, height: logicalH };
+      invoke('update_panel_size', { width: logicalW, height: logicalH });
+    }
+  } catch (_) {
+    // Window may be closing
+  }
+}, 1000);
+
 // Init
 async function init() {
   notes = await invoke('get_all_notes');
