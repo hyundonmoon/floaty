@@ -9,11 +9,19 @@ pub struct Position {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Size {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Note {
     pub id: String,
     pub text: String,
     pub pinned: bool,
     pub position: Option<Position>,
+    #[serde(default)]
+    pub size: Option<Size>,
     pub created_at: String,
 }
 
@@ -76,6 +84,7 @@ impl NoteStore {
             text: String::new(),
             pinned: false,
             position: None,
+            size: None,
             created_at: chrono::Utc::now().to_rfc3339(),
         };
         self.notes.insert(0, note.clone());
@@ -105,6 +114,13 @@ impl NoteStore {
     pub fn update_position(&mut self, id: &str, x: f64, y: f64) {
         if let Some(note) = self.notes.iter_mut().find(|n| n.id == id) {
             note.position = Some(Position { x, y });
+            self.save_to_disk();
+        }
+    }
+
+    pub fn update_size(&mut self, id: &str, width: f64, height: f64) {
+        if let Some(note) = self.notes.iter_mut().find(|n| n.id == id) {
+            note.size = Some(Size { width, height });
             self.save_to_disk();
         }
     }
@@ -166,6 +182,17 @@ mod tests {
         }
         let store2 = NoteStore::new(path);
         assert_eq!(store2.get_all().len(), 1);
+    }
+
+    #[test]
+    fn test_update_size() {
+        let (mut store, _f) = temp_store();
+        let note = store.create();
+        store.update_size(&note.id, 300.0, 250.0);
+        let updated = store.get_all();
+        let size = updated[0].size.as_ref().unwrap();
+        assert!((size.width - 300.0).abs() < f64::EPSILON);
+        assert!((size.height - 250.0).abs() < f64::EPSILON);
     }
 
     #[test]
