@@ -113,3 +113,11 @@ pub fn update_panel_position(state: State<'_, PreferencesState>, x: f64, y: f64)
     let mut prefs = state.lock().unwrap();
     prefs.set_panel_position(x, y);
 }
+
+#[tauri::command]
+pub fn open_url(url: String) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open").arg(&url).spawn();
+    }
+}

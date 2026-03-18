@@ -46,6 +46,7 @@ pub fn run() {
             commands::update_panel_size,
             commands::update_panel_position,
             commands::open_note_window,
+            commands::open_url,
             windows::set_window_opacity,
         ])
         .setup(|app| {
