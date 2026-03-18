@@ -13,8 +13,19 @@ use tauri::{
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
-fn show_panel(panel: &WebviewWindow, position: Position) {
-    let _ = WindowExt::move_window(panel, position);
+fn get_saved_panel_position(app: &tauri::AppHandle) -> Option<notes::Position> {
+    app.state::<PreferencesState>().lock().unwrap().get_panel_position()
+}
+
+fn show_panel(panel: &WebviewWindow, saved_position: Option<notes::Position>, fallback: Position) {
+    if let Some(pos) = saved_position {
+        let _ = panel.set_position(tauri::Position::Logical(tauri::LogicalPosition {
+            x: pos.x,
+            y: pos.y,
+        }));
+    } else {
+        let _ = WindowExt::move_window(panel, fallback);
+    }
     let _ = panel.show();
     let _ = panel.set_focus();
 }
@@ -33,6 +44,7 @@ pub fn run() {
             commands::update_position,
             commands::update_size,
             commands::update_panel_size,
+            commands::update_panel_position,
             commands::open_note_window,
             windows::set_window_opacity,
         ])
@@ -60,6 +72,7 @@ pub fn run() {
                 }
             }
 
+            let saved_panel_position = prefs_store.get_panel_position();
             app.manage::<PreferencesState>(Mutex::new(prefs_store));
 
             let app_handle = app.handle().clone();
@@ -76,9 +89,9 @@ pub fn run() {
                 );
             }
 
-            // Show panel on launch (center on screen; tray position unknown yet)
+            // Show panel on launch
             if let Some(panel) = app.get_webview_window("panel") {
-                show_panel(&panel, Position::Center);
+                show_panel(&panel, saved_panel_position, Position::Center);
             }
 
             // Tray icon click handler
@@ -93,7 +106,7 @@ pub fn run() {
                         if panel.is_visible().unwrap_or(false) {
                             let _ = panel.hide();
                         } else {
-                            show_panel(&panel, Position::TrayCenter);
+                            show_panel(&panel, get_saved_panel_position(&app_handle), Position::TrayCenter);
                         }
                     }
                 }
@@ -115,7 +128,7 @@ pub fn run() {
         .run(|app, event| {
             if let RunEvent::Reopen { .. } = event {
                 if let Some(panel) = app.get_webview_window("panel") {
-                    show_panel(&panel, Position::TrayCenter);
+                    show_panel(&panel, get_saved_panel_position(app), Position::TrayCenter);
                 }
             }
         });

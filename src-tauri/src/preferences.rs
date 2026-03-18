@@ -1,18 +1,14 @@
-use crate::notes::Size;
+use crate::notes::{Position, Size};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Preferences {
     #[serde(default)]
     pub panel_size: Option<Size>,
-}
-
-impl Default for Preferences {
-    fn default() -> Self {
-        Preferences { panel_size: None }
-    }
+    #[serde(default)]
+    pub panel_position: Option<Position>,
 }
 
 pub struct PreferencesStore {
@@ -26,7 +22,7 @@ impl PreferencesStore {
         PreferencesStore { file_path, prefs }
     }
 
-    fn load_from_disk(path: &PathBuf) -> Preferences {
+    fn load_from_disk(path: &std::path::Path) -> Preferences {
         let data = match fs::read_to_string(path) {
             Ok(d) => d,
             Err(_) => return Preferences::default(),
@@ -51,6 +47,15 @@ impl PreferencesStore {
         self.prefs.panel_size = Some(Size { width, height });
         self.save_to_disk();
     }
+
+    pub fn get_panel_position(&self) -> Option<Position> {
+        self.prefs.panel_position.clone()
+    }
+
+    pub fn set_panel_position(&mut self, x: f64, y: f64) {
+        self.prefs.panel_position = Some(Position { x, y });
+        self.save_to_disk();
+    }
 }
 
 #[cfg(test)]
@@ -73,6 +78,23 @@ mod tests {
         let size = store.get_panel_size().unwrap();
         assert!((size.width - 400.0).abs() < f64::EPSILON);
         assert!((size.height - 600.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_default_no_panel_position() {
+        let file = NamedTempFile::new().unwrap();
+        let store = PreferencesStore::new(file.path().to_path_buf());
+        assert!(store.get_panel_position().is_none());
+    }
+
+    #[test]
+    fn test_set_and_get_panel_position() {
+        let file = NamedTempFile::new().unwrap();
+        let mut store = PreferencesStore::new(file.path().to_path_buf());
+        store.set_panel_position(100.0, 200.0);
+        let pos = store.get_panel_position().unwrap();
+        assert!((pos.x - 100.0).abs() < f64::EPSILON);
+        assert!((pos.y - 200.0).abs() < f64::EPSILON);
     }
 
     #[test]

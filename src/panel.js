@@ -162,17 +162,28 @@ document.getElementById('add-btn').addEventListener('click', async () => {
 
 const panelWindow = getCurrentWindow();
 let lastPanelSize = { width: 0, height: 0 };
+let lastPanelPosition = { x: 0, y: 0 };
 
 setInterval(async () => {
   try {
-    const size = await panelWindow.innerSize();
     const scale = await panelWindow.scaleFactor();
+
+    const size = await panelWindow.innerSize();
     const logicalW = size.width / scale;
     const logicalH = size.height / scale;
 
     if (logicalW !== lastPanelSize.width || logicalH !== lastPanelSize.height) {
       lastPanelSize = { width: logicalW, height: logicalH };
       invoke('update_panel_size', { width: logicalW, height: logicalH });
+    }
+
+    const pos = await panelWindow.outerPosition();
+    const logicalX = pos.x / scale;
+    const logicalY = pos.y / scale;
+
+    if (logicalX !== lastPanelPosition.x || logicalY !== lastPanelPosition.y) {
+      lastPanelPosition = { x: logicalX, y: logicalY };
+      invoke('update_panel_position', { x: logicalX, y: logicalY });
     }
   } catch (_) {
     // Window may be closing
