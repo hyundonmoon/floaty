@@ -187,24 +187,6 @@ body.panel {
   border: 1.5px solid var(--accent-dim);
 }
 
-/* Editing state */
-.note-edit {
-  flex: 1;
-  min-width: 0;
-  background: var(--bg-edit);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
-  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 8px 10px;
-  resize: none;
-  min-height: 120px;
-  caret-color: var(--accent);
-  outline: none;
-}
-
 .empty-state {
   display: flex;
   align-items: center;
@@ -284,41 +266,98 @@ body.note {
   overflow-y: auto;
 }
 
-.note-body textarea {
-  width: 100%;
-  height: 100%;
-  background: transparent;
+/* ── Note Toolbar ── */
+
+.note-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.note-toolbar button {
+  background: none;
   border: none;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1;
+  min-width: 22px;
+  text-align: center;
+}
+
+.note-toolbar button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.note-toolbar button.is-active {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  margin: 0 3px;
+}
+
+/* ── Tiptap Editor ── */
+
+.tiptap-editor {
+  height: 100%;
+}
+
+.tiptap-editor .tiptap {
   outline: none;
+  height: 100%;
   font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
   color: var(--text);
   line-height: 1.6;
-  resize: none;
   caret-color: var(--accent);
 }
 
-.note-body textarea::placeholder {
-  color: var(--text-dim);
+.tiptap-editor .tiptap p {
+  margin: 0 0 0.3em;
 }
 
-.note-display {
-  font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.6;
-  cursor: text;
-  white-space: pre-wrap;
-  word-break: break-word;
-  height: 100%;
+.tiptap-editor .tiptap h1 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 0.3em;
 }
 
-.note-link {
+.tiptap-editor .tiptap ul,
+.tiptap-editor .tiptap ol {
+  padding-left: 1.4em;
+  margin: 0 0 0.3em;
+}
+
+.tiptap-editor .tiptap li {
+  margin: 0;
+}
+
+.tiptap-editor .tiptap a {
   color: var(--accent);
   text-decoration: underline;
   cursor: pointer;
 }
 
-.note-link:hover {
+.tiptap-editor .tiptap a:hover {
   color: var(--text);
+}
+
+.tiptap-editor .tiptap p.is-editor-empty:first-child::before {
+  content: 'Type your note...';
+  color: var(--text-dim);
+  float: left;
+  pointer-events: none;
+  height: 0;
 }
