@@ -4,7 +4,10 @@
   "version": "0.1.1",
   "identifier": "com.floaty.notes",
   "build": {
-    "frontendDist": "../src"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
   },
   "bundle": {
     "icon": [
@@ -17,7 +20,6 @@
   },
   "app": {
     "macOSPrivateApi": true,
-    "withGlobalTauri": true,
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
     },

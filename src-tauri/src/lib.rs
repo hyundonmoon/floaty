@@ -38,6 +38,7 @@ pub fn run() {
             commands::get_all_notes,
             commands::create_note,
             commands::update_note,
+            commands::update_note_content,
             commands::delete_note,
             commands::pin_note,
             commands::unpin_note,

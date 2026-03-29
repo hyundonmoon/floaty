@@ -40,6 +40,20 @@ pub fn update_note(
 }
 
 #[tauri::command]
+pub fn update_note_content(
+    app: AppHandle,
+    state: State<'_, NoteStoreState>,
+    id: String,
+    content: String,
+    text: String,
+) -> Option<Note> {
+    let mut store = state.lock().unwrap();
+    let result = store.update_content(&id, &content, &text);
+    emit_notes_changed(&app, &store);
+    result
+}
+
+#[tauri::command]
 pub fn delete_note(app: AppHandle, state: State<'_, NoteStoreState>, id: String) {
     let mut store = state.lock().unwrap();
     // Check if pinned, close floating window

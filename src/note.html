@@ -17,10 +17,21 @@
         </button>
       </div>
     </div>
+    <div class="note-toolbar" id="toolbar">
+      <button data-action="bold" title="Bold (⌘B)"><strong>B</strong></button>
+      <button data-action="italic" title="Italic (⌘I)"><em>I</em></button>
+      <button data-action="strike" title="Strikethrough" style="text-decoration:line-through">S</button>
+      <span class="toolbar-sep"></span>
+      <button data-action="heading" title="Heading">H</button>
+      <button data-action="bulletList" title="Bullet list">•</button>
+      <button data-action="orderedList" title="Ordered list">1.</button>
+      <span class="toolbar-sep"></span>
+      <button data-action="link" title="Link">🔗</button>
+    </div>
     <div class="note-body">
-      <textarea id="note-textarea" placeholder="Type your note..."></textarea>
+      <div id="editor" class="tiptap-editor"></div>
     </div>
   </div>
-  <script src="note.js"></script>
+  <script type="module" src="/note.js"></script>
 </body>
 </html>

@@ -1,140 +1,137 @@
-const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
-const { getCurrentWindow } = window.__TAURI__.window;
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { createEditor } from './editor.js';
 
 const currentWindow = getCurrentWindow();
 const noteId = new URLSearchParams(window.location.search).get('id');
 
 const titleText = document.querySelector('.note-titlebar-text');
-const textarea = document.getElementById('note-textarea');
-const noteBody = document.querySelector('.note-body');
+const editorEl = document.getElementById('editor');
+const toolbar = document.getElementById('toolbar');
 const closeBtn = document.getElementById('close-btn');
 
-let lastSavedText = '';
 let lastPosition = { x: 0, y: 0 };
 let lastSize = { width: 0, height: 0 };
-let editing = false;
+let lastSavedHtml = '';
+let editor = null;
 
-// URL regex for linkifying text
-const urlRegex = /(https?:\/\/[^\s<]+)/g;
-
-function renderDisplayView(text) {
-  const display = document.createElement('div');
-  display.className = 'note-display';
-
-  if (!text) {
-    display.textContent = '';
-    return display;
-  }
-
-  // Split text into lines, linkify URLs within each line
-  const lines = text.split('\n');
-  lines.forEach((line, i) => {
-    let lastIndex = 0;
-    let match;
-    urlRegex.lastIndex = 0;
-
-    while ((match = urlRegex.exec(line)) !== null) {
-      // Add text before the URL
-      if (match.index > lastIndex) {
-        display.appendChild(document.createTextNode(line.slice(lastIndex, match.index)));
-      }
-      // Add clickable link
-      const url = match[0];
-      const link = document.createElement('a');
-      link.href = '#';
-      link.className = 'note-link';
-      link.textContent = url;
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        invoke('open_url', { url });
-      });
-      display.appendChild(link);
-      lastIndex = urlRegex.lastIndex;
-    }
-    // Remaining text after last URL
-    if (lastIndex < line.length) {
-      display.appendChild(document.createTextNode(line.slice(lastIndex)));
-    }
-    if (i < lines.length - 1) {
-      display.appendChild(document.createElement('br'));
-    }
-  });
-
-  return display;
+// Convert legacy plain text to HTML paragraphs
+function plainTextToHtml(text) {
+  if (!text) return '<p></p>';
+  return text
+    .split('\n')
+    .map(line => `<p>${line || '<br>'}</p>`)
+    .join('');
 }
 
-function showDisplayMode() {
-  editing = false;
-  textarea.style.display = 'none';
-  // Remove old display view
-  const old = noteBody.querySelector('.note-display');
-  if (old) old.remove();
-
-  const display = renderDisplayView(textarea.value);
-  display.addEventListener('click', (e) => {
-    if (e.target.classList.contains('note-link')) return;
-    showEditMode();
-  });
-  noteBody.appendChild(display);
-}
-
-function showEditMode() {
-  editing = true;
-  const display = noteBody.querySelector('.note-display');
-  if (display) display.remove();
-  textarea.style.display = '';
-  textarea.focus();
-}
-
-function updateDisplay(note) {
-  if (!note) return;
-
-  const firstLine = note.text.split('\n')[0] || 'Note';
+function updateTitleFromEditor() {
+  const text = editor.getText();
+  const firstLine = text.split('\n')[0] || 'Note';
   titleText.textContent = firstLine;
-
-  if (!editing) {
-    textarea.value = note.text;
-    lastSavedText = note.text;
-    showDisplayMode();
-  }
 }
 
-// Save on blur, switch to display mode
-textarea.addEventListener('blur', () => {
-  if (textarea.value !== lastSavedText) {
-    lastSavedText = textarea.value;
-    invoke('update_note', { id: noteId, text: textarea.value });
+function saveContent() {
+  if (!editor) return;
+  const html = editor.getHTML();
+  if (html === lastSavedHtml) return;
+  lastSavedHtml = html;
+  const text = editor.getText();
+  invoke('update_note_content', { id: noteId, content: html, text });
+}
+
+// Toolbar: event delegation
+toolbar.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn || !editor) return;
+
+  const action = btn.dataset.action;
+  const chain = editor.chain().focus();
+
+  switch (action) {
+    case 'bold':
+      chain.toggleBold().run();
+      break;
+    case 'italic':
+      chain.toggleItalic().run();
+      break;
+    case 'strike':
+      chain.toggleStrike().run();
+      break;
+    case 'heading':
+      chain.toggleHeading({ level: 1 }).run();
+      break;
+    case 'bulletList':
+      chain.toggleBulletList().run();
+      break;
+    case 'orderedList':
+      chain.toggleOrderedList().run();
+      break;
+    case 'link': {
+      if (editor.isActive('link')) {
+        chain.unsetLink().run();
+      } else {
+        const url = prompt('Enter URL:');
+        if (url) {
+          chain.setLink({ href: url }).run();
+        }
+      }
+      break;
+    }
   }
-  showDisplayMode();
 });
 
-// Update title bar live as user types
-textarea.addEventListener('input', () => {
-  const firstLine = textarea.value.split('\n')[0] || 'Note';
-  titleText.textContent = firstLine;
+// Update active states on toolbar buttons
+function updateToolbarState() {
+  if (!editor) return;
+  toolbar.querySelectorAll('button[data-action]').forEach(btn => {
+    const action = btn.dataset.action;
+    let active = false;
+    switch (action) {
+      case 'bold': active = editor.isActive('bold'); break;
+      case 'italic': active = editor.isActive('italic'); break;
+      case 'strike': active = editor.isActive('strike'); break;
+      case 'heading': active = editor.isActive('heading', { level: 1 }); break;
+      case 'bulletList': active = editor.isActive('bulletList'); break;
+      case 'orderedList': active = editor.isActive('orderedList'); break;
+      case 'link': active = editor.isActive('link'); break;
+    }
+    btn.classList.toggle('is-active', active);
+  });
+}
+
+// Handle link clicks inside editor
+editorEl.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link) {
+    e.preventDefault();
+    const url = link.getAttribute('href');
+    if (url) invoke('open_url', { url });
+  }
 });
 
 // Close button → unpin note
 closeBtn.addEventListener('click', () => {
-  // Save any unsaved text first
-  if (textarea.value !== lastSavedText) {
-    invoke('update_note', { id: noteId, text: textarea.value });
-  }
+  saveContent();
   invoke('unpin_note', { id: noteId });
 });
 
-// Listen for sync events
+// Listen for sync events — update if not focused
 listen('notes-changed', event => {
   const notes = event.payload;
   const note = notes.find(n => n.id === noteId);
-  if (note) {
-    updateDisplay(note);
+  if (note && editor && !editor.isFocused) {
+    const html = note.content || plainTextToHtml(note.text);
+    if (html !== editor.getHTML()) {
+      editor.commands.setContent(html);
+      lastSavedHtml = editor.getHTML();
+    }
+    const firstLine = note.text.split('\n')[0] || 'Note';
+    titleText.textContent = firstLine;
   }
 });
 
-// Position tracking: poll every 1s
+// Position & size tracking
 setInterval(async () => {
   try {
     const pos = await currentWindow.outerPosition();
@@ -162,19 +159,36 @@ setInterval(async () => {
 
 // Save before window close
 window.addEventListener('beforeunload', () => {
-  if (textarea.value !== lastSavedText) {
-    invoke('update_note', { id: noteId, text: textarea.value });
-  }
+  saveContent();
 });
 
 // Init
 async function init() {
   const notes = await invoke('get_all_notes');
   const note = notes.find(n => n.id === noteId);
+
+  let initialContent = '<p></p>';
   if (note) {
-    updateDisplay(note);
-    lastSavedText = note.text;
+    initialContent = note.content || plainTextToHtml(note.text);
+    const firstLine = note.text.split('\n')[0] || 'Note';
+    titleText.textContent = firstLine;
   }
+
+  editor = createEditor(editorEl, {
+    content: initialContent,
+    onUpdate: () => {
+      updateTitleFromEditor();
+      updateToolbarState();
+    },
+    onBlur: () => {
+      saveContent();
+    },
+    onSelectionUpdate: () => {
+      updateToolbarState();
+    },
+  });
+
+  lastSavedHtml = editor.getHTML();
 }
 
 init();
