@@ -22,6 +22,8 @@ pub struct Note {
     pub position: Option<Position>,
     #[serde(default)]
     pub size: Option<Size>,
+    #[serde(default)]
+    pub content: Option<String>,
     pub created_at: String,
 }
 
@@ -85,6 +87,7 @@ impl NoteStore {
             pinned: false,
             position: None,
             size: None,
+            content: None,
             created_at: chrono::Utc::now().to_rfc3339(),
         };
         self.notes.insert(0, note.clone());
@@ -94,6 +97,14 @@ impl NoteStore {
 
     pub fn update_text(&mut self, id: &str, text: &str) -> Option<Note> {
         let idx = self.notes.iter().position(|n| n.id == id)?;
+        self.notes[idx].text = text.to_string();
+        self.save_to_disk();
+        Some(self.notes[idx].clone())
+    }
+
+    pub fn update_content(&mut self, id: &str, content: &str, text: &str) -> Option<Note> {
+        let idx = self.notes.iter().position(|n| n.id == id)?;
+        self.notes[idx].content = Some(content.to_string());
         self.notes[idx].text = text.to_string();
         self.save_to_disk();
         Some(self.notes[idx].clone())
@@ -193,6 +204,33 @@ mod tests {
         let size = updated[0].size.as_ref().unwrap();
         assert!((size.width - 300.0).abs() < f64::EPSILON);
         assert!((size.height - 250.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_update_content() {
+        let (mut store, _f) = temp_store();
+        let note = store.create();
+        let updated = store.update_content(&note.id, "<p><strong>hello</strong></p>", "hello").unwrap();
+        assert_eq!(updated.content.as_deref(), Some("<p><strong>hello</strong></p>"));
+        assert_eq!(updated.text, "hello");
+
+        // update_text should preserve content
+        let preserved = store.update_text(&note.id, "plain").unwrap();
+        assert_eq!(preserved.content.as_deref(), Some("<p><strong>hello</strong></p>"));
+        assert_eq!(preserved.text, "plain");
+    }
+
+    #[test]
+    fn test_update_text_preserves_content() {
+        let (mut store, _f) = temp_store();
+        let note = store.create();
+        // Set rich content
+        store.update_content(&note.id, "<p><strong>bold</strong></p>", "bold");
+        // Update text (simulating a plain text edit)
+        let updated = store.update_text(&note.id, "new text").unwrap();
+        // content should NOT be cleared
+        assert_eq!(updated.content.as_deref(), Some("<p><strong>bold</strong></p>"));
+        assert_eq!(updated.text, "new text");
     }
 
     #[test]
